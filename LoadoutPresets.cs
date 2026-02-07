@@ -1,6 +1,4 @@
-﻿using Assets.Scripts._Data.ShopItems;
-
-using BepInEx;
+﻿using BepInEx;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
 
@@ -15,7 +13,6 @@ using System.Text.Json;
 using TMPro;
 
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -29,7 +26,7 @@ public class LoadoutPresets : BasePlugin
     private const string _MODNAME = "LoadoutPresets";
     private const string _AUTHOR = "ZeusesNeckMeat";
     private const string _GUID = _AUTHOR + "_" + _MODNAME;
-    private const string _VERSION = "0.1.1";
+    private const string _VERSION = "0.1.3";
 
     private static ManualLogSource _logger;
     private static string _LoadoutPresetsFolder;
@@ -530,10 +527,9 @@ public class LoadoutPresets : BasePlugin
     private static void RefreshLoadoutList()
     {
         // Clear existing items
-        foreach (var o in _loadoutListContainer)
+        for (int i = _loadoutListContainer.childCount - 1; i >= 0; i--)
         {
-            var child = (Transform)o;
-            UObject.Destroy(child.gameObject);
+            UObject.Destroy(_loadoutListContainer.GetChild(i).gameObject);
         }
 
         if (!Directory.Exists(_LoadoutPresetsFolder))
@@ -764,12 +760,7 @@ public class LoadoutPresets : BasePlugin
                 Directory.CreateDirectory(_LoadoutPresetsFolder);
             }
 
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-            {
-                FileName = _LoadoutPresetsFolder,
-                UseShellExecute = true,
-                Verb = "open"
-            });
+            Application.OpenURL(_LoadoutPresetsFolder);
 
             _logger.LogInfo("Opened LoadoutPresets folder");
         }

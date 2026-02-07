@@ -16,6 +16,12 @@ Install with a mod manager like r2modman or Thunderstore Mod Manager.
 
 ## Changelog
 
+### 0.1.3
+- Fixed error when trying to refresh the loadout list after adding or deleting a loadout
+
+### 0.1.2
+- Swapped from Process.Start to Application.OpenURL
+
 ### 0.1.1
 - Fixed issues with Readme and Manifest having incorrect data
 
