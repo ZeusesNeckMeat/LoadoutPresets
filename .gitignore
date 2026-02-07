@@ -56,3 +56,5 @@ nunit-*.xml
 .vs
 /Libs/*
 !/Libs/README.md
+*.zip
+/thunderstore_packaging/LoadoutPresets.dll

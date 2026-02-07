@@ -29,7 +29,7 @@ public class LoadoutPresets : BasePlugin
     private const string _MODNAME = "LoadoutPresets";
     private const string _AUTHOR = "ZeusesNeckMeat";
     private const string _GUID = _AUTHOR + "_" + _MODNAME;
-    private const string _VERSION = "0.1.0";
+    private const string _VERSION = "0.1.1";
 
     private static ManualLogSource _logger;
     private static string _LoadoutPresetsFolder;

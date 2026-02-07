@@ -1,8 +1,8 @@
 {
     "name": "LoadoutPresets",
-    "version_number": "0.1.0",
-    "website_url": "https://github.com/GITHUB_OWNER/GITHUB_REPO_NAME",
-    "description": "LoadoutPresets_DESCRIPTION",
+    "version_number": "0.1.1",
+    "website_url": "https://github.com/ZeusesNeckMeat/LoadoutPresets",
+    "description": "Save and Load presets for all of your items, tomes, and weapons.",
     "dependencies": [
         "BepInEx-BepInExPack_IL2CPP-6.0.733"
     ]
