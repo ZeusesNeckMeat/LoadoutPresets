@@ -277,6 +277,62 @@ public class LoadoutPresets : BasePlugin
 
         _loadoutListContainer = containerObj.transform;
 
+        // Add ScrollRect component for scrolling functionality
+        var scrollRectComponent = scrollObj.AddComponent<ScrollRect>();
+        scrollRectComponent.content = containerRect;
+        scrollRectComponent.viewport = scrollRect;
+        scrollRectComponent.horizontal = false;
+        scrollRectComponent.vertical = true;
+        scrollRectComponent.movementType = ScrollRect.MovementType.Clamped;
+        scrollRectComponent.scrollSensitivity = 20f;
+        scrollRectComponent.inertia = true;
+        scrollRectComponent.decelerationRate = 0.135f;
+
+        // Create vertical scrollbar
+        var scrollbarObj = new GameObject("Scrollbar Vertical");
+        scrollbarObj.transform.SetParent(scrollObj.transform, false);
+
+        var scrollbarRect = scrollbarObj.AddComponent<RectTransform>();
+        scrollbarRect.anchorMin = new Vector2(1, 0);
+        scrollbarRect.anchorMax = new Vector2(1, 1);
+        scrollbarRect.pivot = new Vector2(1, 1);
+        scrollbarRect.sizeDelta = new Vector2(20, 0);
+        scrollbarRect.anchoredPosition = Vector2.zero;
+
+        var scrollbarImage = scrollbarObj.AddComponent<Image>();
+        scrollbarImage.color = new Color(0.1f, 0.1f, 0.1f, 1f);
+
+        var scrollbar = scrollbarObj.AddComponent<Scrollbar>();
+        scrollbar.direction = Scrollbar.Direction.BottomToTop;
+
+        // Create scrollbar handle
+        var handleObj = new GameObject("Sliding Area");
+        handleObj.transform.SetParent(scrollbarObj.transform, false);
+
+        var handleAreaRect = handleObj.AddComponent<RectTransform>();
+        handleAreaRect.anchorMin = Vector2.zero;
+        handleAreaRect.anchorMax = Vector2.one;
+        handleAreaRect.sizeDelta = new Vector2(-20, -20);
+        handleAreaRect.anchoredPosition = Vector2.zero;
+
+        var handleChildObj = new GameObject("Handle");
+        handleChildObj.transform.SetParent(handleObj.transform, false);
+
+        var handleRect = handleChildObj.AddComponent<RectTransform>();
+        handleRect.anchorMin = Vector2.zero;
+        handleRect.anchorMax = Vector2.one;
+        handleRect.sizeDelta = Vector2.zero;
+
+        var handleImage = handleChildObj.AddComponent<Image>();
+        handleImage.color = new Color(0.5f, 0.5f, 0.5f, 1f);
+
+        scrollbar.handleRect = handleRect;
+        scrollbar.targetGraphic = handleImage;
+
+        // Link scrollbar to ScrollRect
+        scrollRectComponent.verticalScrollbar = scrollbar;
+        scrollRectComponent.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
+
         _loadoutMenuPanel.SetActive(false);
 
         CreateSaveDialog(canvasRoot);

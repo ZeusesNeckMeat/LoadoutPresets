@@ -1,6 +1,6 @@
 {
     "name": "LoadoutPresets",
-    "version_number": "0.1.3",
+    "version_number": "0.1.4",
     "website_url": "https://github.com/ZeusesNeckMeat/LoadoutPresets",
     "description": "Save and Load presets for all of your items, tomes, and weapons.",
     "dependencies": [
