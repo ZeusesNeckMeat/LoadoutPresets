@@ -91,14 +91,9 @@ internal static class LoadoutsMenu
             return;
         }
 
-        Main.Logger.LogDebug($"LoadoutsMenu: Attempting to open menu. Current active state: {_loadoutsMenuPanel.activeSelf}");
-        Main.Logger.LogDebug($"_characterSelect has value: {_characterSelect != null}. Active state: {_characterSelect?.activeSelf}");
         _characterSelect.SetActive(false);
-        
-        Main.Logger.LogDebug($"_loadoutsMenuPanel parent: {_loadoutsMenuPanel.transform.parent?.name}. Attempting to hide parent menu if exists.");
         _loadoutsMenuPanel.transform.parent.Find("Menu")?.gameObject.SetActive(false);
 
-        Main.Logger.LogDebug("LoadoutsMenu: Clearing loadout name input field.");
         if (_loadoutNameInput)
         {
             _loadoutNameInput.text = "";
@@ -112,21 +107,11 @@ internal static class LoadoutsMenu
 
         RefreshLoadoutList();
 
-        Main.Logger.LogDebug($"LoadoutsMenu: Deactivating main menu panel if exists. Current active state: {_mainMenuPanel?.activeSelf}, {_mainMenuPanel?.name}");
         if (_mainMenuPanel)
-        {
             _mainMenuPanel.SetActive(false);
-        }
 
-        Main.Logger.LogDebug($"LoadoutsMenu: List Container Exists: {_loadoutListContainer != null}. Active state: {_loadoutListContainer?.gameObject.activeSelf}");
-        var containerPointer = _loadoutListContainer.Pointer;
-        var panelScrollRectPointer = _loadoutsMenuPanel.GetComponentInChildren<ScrollRect>()?.Pointer;
-        Main.Logger.LogDebug($"LoadoutsMenu: Container Pointer: {containerPointer}, Panel ScrollRect Pointer: {panelScrollRectPointer}");
-
-        Main.Logger.LogDebug("LoadoutsMenu: Activating loadouts menu panel.");
         _loadoutsMenuPanel.SetActive(true);
-
-        Main.Logger.LogDebug($"LoadoutsMenu: Menu activated. New active state: {_loadoutsMenuPanel.activeSelf}");
+        Main.Logger.LogDebug("LoadoutsMenu: Menu opened successfully."); // Single log at end
     }
 
     /// <summary>
@@ -218,21 +203,10 @@ internal static class LoadoutsMenu
 
         var titleText = _loadoutsMenuPanel.transform.Find("Header/Header/T_Title")?.GetComponent<TextMeshProUGUI>();
         var allLoadouts = Main.LoadoutDatasCache().OrderBy(x => x.Name);
-
+        
         foreach (var loadout in allLoadouts)
         {
-            Main.Logger.LogDebug($"LoadoutsMenu: Processing loadout '{loadout.Name}' with linked character '{loadout.LinkedCharacter}'");
-            ECharacter? linkedCharacter = null;
-            
-            for (var i = 0; i < DataManager.Instance.unsortedCharacterData.Count; i++)
-            {
-                var characterData = DataManager.Instance.unsortedCharacterData[i];
-                if (characterData.GetName() == loadout.LinkedCharacter)
-                {
-                    linkedCharacter = characterData.eCharacter;
-                    break;
-                }
-            }
+            var linkedCharacter = loadout.LinkedCharacter.GetEnumFromDisplayName();
 
             LoadoutListFactory.CreateLoadoutListItem(
                 loadout.Name,

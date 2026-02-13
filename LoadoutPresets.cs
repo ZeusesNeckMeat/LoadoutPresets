@@ -154,7 +154,7 @@ public class LoadoutPresets : BasePlugin
             return;
         }
 
-        var characterDisplayName =  DataManager.Instance.characterData[character].GetName();
+        var characterDisplayName = character.GetDisplayName();
         loadoutData.LinkedCharacter = characterDisplayName;
 
         var filePath = Path.Combine(_loadoutPresetsFolder, $"{loadoutName}.json");
@@ -314,13 +314,13 @@ public class LoadoutPresets : BasePlugin
 
     public static void ActivateLoadoutFromCharacter(ECharacter? eCharacter)
     {
-        if (eCharacter == null)
+        if (!eCharacter.HasValue)
         {
             Logger.LogWarning("ActivateLoadoutFromCharacter called with null character.");
             return;
         }
 
-        var characterName = DataManager.Instance.characterData[eCharacter.Value].GetName();
+        var characterName = eCharacter.GetDisplayName();
         var characterLoadout = LoadoutDatasCache()
             .FirstOrDefault(ld => string.Equals(ld.LinkedCharacter, characterName, StringComparison.OrdinalIgnoreCase));
 

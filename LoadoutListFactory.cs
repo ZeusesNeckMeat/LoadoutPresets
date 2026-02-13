@@ -160,8 +160,8 @@ internal static class LoadoutListFactory
         if (titleTextReference)
             nameText.font = titleTextReference.font;
 
-        var characterData = linkedCharacter.HasValue ? DataManager.Instance.characterData[linkedCharacter.Value] : null;
-        var characterDisplayName = characterData != null ? characterData.GetName() : "None";
+        var characterData = linkedCharacter.GetCharacterData();
+        var characterDisplayName = linkedCharacter.GetDisplayName() ?? "None";
         var characterIconName = characterData?.icon?.name;
 
         var characterButton = ButtonFactory.CreateNativeButton(

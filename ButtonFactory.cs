@@ -7,7 +7,10 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
+using ComponentNames = LoadoutPresets.Constants.ComponentNames;
 using Main = LoadoutPresets.LoadoutPresets;
+using UIText = LoadoutPresets.Constants.UIText;
+using UnityComponentTypes = LoadoutPresets.Constants.UnityComponentTypes;
 using UObject = UnityEngine.Object;
 
 namespace LoadoutPresets;
@@ -43,8 +46,6 @@ internal static class ButtonFactory
         string iconName,
         Transform customParent = null)
     {
-        Main.Logger.LogDebug($"ButtonFactory: Starting creation of '{buttonName}' using template '{templateButton.name}'.");
-
         var clonedButton = UObject.Instantiate(templateButton);
         clonedButton.name = buttonName;
 
@@ -63,7 +64,7 @@ internal static class ButtonFactory
 
         StripNonVisualComponents(clonedButton);
 
-        var iconTransform = clonedButton.transform.Find("Icon");
+        var iconTransform = clonedButton.transform.Find(ComponentNames.ICON);
         if (iconTransform)
         {
             if (!string.IsNullOrEmpty(iconName))
@@ -80,8 +81,6 @@ internal static class ButtonFactory
         var buttonComponent = clonedButton.GetOrAddComponent<Button>();
         SetupNativeBehavior(buttonComponent, templateButton, buttonText);
 
-        Main.Logger.LogDebug($"ButtonFactory: Successfully created and configured '{buttonName}'.");
-
         return buttonComponent;
     }
 
@@ -94,10 +93,10 @@ internal static class ButtonFactory
         {
             var typeName = component.GetIl2CppType().Name;
 
-            if (typeName == "RectTransform" ||
-                typeName == "CanvasRenderer" ||
-                typeName == "Image" ||
-                typeName == "Mask")
+            if (typeName == UnityComponentTypes.RECT_TRANSFORM ||
+                typeName == UnityComponentTypes.CANVAS_RENDERER ||
+                typeName == UnityComponentTypes.IMAGE ||
+                typeName == UnityComponentTypes.MASK)
             {
                 continue;
             }
@@ -163,7 +162,7 @@ internal static class ButtonFactory
         targetButtonComponent.transition = Selectable.Transition.None;
         Main.Logger.LogDebug($"ButtonFactory: Linked background image to '{targetGameObject.name}' and disabled standard transitions.");
 
-        var textTransform = targetButtonComponent.transform.Find("T_Text");
+        var textTransform = targetButtonComponent.transform.Find(ComponentNames.TEXT);
         if (textTransform)
         {
             zombieButtonComponent.scaleOnHover = textTransform;
@@ -193,7 +192,7 @@ internal static class ButtonFactory
 
     private static void UpdateTextComponent(Transform buttonTransform, string newTextValue)
     {
-        var textTransform = buttonTransform.Find("T_Text");
+        var textTransform = buttonTransform.Find(ComponentNames.TEXT);
         if (!textTransform)
         {
             Main.Logger.LogError($"ButtonFactory: UpdateTextComponent failed - 'T_Text' not found under '{buttonTransform.gameObject.name}'.");
@@ -201,7 +200,7 @@ internal static class ButtonFactory
         }
 
         var textGameObject = textTransform.gameObject;
-        textGameObject.name = $"{buttonTransform.gameObject.name}_Text_Protected";
+        textGameObject.name = $"{buttonTransform.gameObject.name}{UIText.TEXT_PROTECTED_SUFFIX}";
 
         var textMeshComponent = textGameObject.GetComponent<TextMeshProUGUI>();
         if (textMeshComponent)
@@ -215,7 +214,7 @@ internal static class ButtonFactory
         {
             var componentTypeName = textComponent.GetIl2CppType().Name;
 
-            if (componentTypeName.Contains("Localize"))
+            if (componentTypeName.Contains(UnityComponentTypes.LOCALIZE))
             {
                 Main.Logger.LogDebug($"ButtonFactory: Destroying localization component '{componentTypeName}' to prevent text reverts.");
                 UObject.DestroyImmediate(textComponent);
@@ -260,7 +259,7 @@ internal static class ButtonFactory
                 myButton.StopHover();
             }
 
-            var overlayTransform = targetButtonComponent.transform.Find("DisabledOverlay");
+            var overlayTransform = targetButtonComponent.transform.Find(ComponentNames.DISABLED_OVERLAY);
             if (overlayTransform)
             {
                 overlayTransform.gameObject.SetActive(false);
