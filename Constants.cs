@@ -5,7 +5,7 @@ internal static class Constants
     public const string MODNAME = "LoadoutPresets";
     public const string AUTHOR = "ZeusesNeckMeat";
     public const string GUID = $"{AUTHOR}_{MODNAME}";
-    public const string VERSION = "0.1.3";
+    public const string VERSION = "1.0.0";
 
     public static class Scenes
     {

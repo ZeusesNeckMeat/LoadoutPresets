@@ -1,9 +1,0 @@
-{
-  "name": "LoadoutPresets",
-  "version_number": "0.1.0",
-  "website_url": "https://github.com/ZeusesNeckMeat/LoadoutPresets",
-  "description": "A mod for managing loadout presets",
-  "dependencies": [
-    "BepInEx-BepInExPack_IL2CPP-6.0.0"
-  ]
-}

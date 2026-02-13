@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>LoadoutPresets</AssemblyName>
     <Description>Adds a Loadout Presets Manager to Megabonk</Description>
-    <Version>0.1.4</Version>
+    <Version>1.0.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
 	  <RootNamespace>LoadoutPresets</RootNamespace>
