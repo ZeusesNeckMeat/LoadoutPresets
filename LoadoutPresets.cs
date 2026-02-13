@@ -6,7 +6,6 @@ using HarmonyLib;
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -15,9 +14,6 @@ using TMPro;
 
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
-
-using UObject = UnityEngine.Object;
 
 namespace LoadoutPresets;
 
@@ -65,10 +61,6 @@ public class LoadoutPresets : BasePlugin
 
             LoadoutsButton.CreateLoadoutsButton(objects);
             LoadoutsMenu.CreateLoadoutsMenu(objects);
-        }
-        else if (scene.name == "DontDestroyOnLoad")
-        {
-            LoadoutNotification.Initialize(scene.GetRootGameObjects());
         }
     }
 
@@ -139,20 +131,8 @@ public class LoadoutPresets : BasePlugin
         {
             Name = loadoutName,
             SavedAt = DateTime.Now,
-            //ShopItems = new Dictionary<string, int>(),
             InactivatedUnlockables = [..SaveManager.Instance.progression.inactivated]
         };
-
-
-        //foreach (var shopItemPair in SaveManager.Instance.progression.shopItems)
-        //{
-        //    loadout.ShopItems[shopItemPair.Key.ToString()] = shopItemPair.Value;
-        //}
-
-        //foreach (var inactivatedItem in SaveManager.Instance.progression.inactivated)
-        //{
-        //    loadout.InactivatedUnlockables.Add(inactivatedItem);
-        //}
 
         var filePath = Path.Combine(_loadoutPresetsFolder, $"{loadoutName}.json");
         var json = JsonSerializer.Serialize(loadout, new JsonSerializerOptions { WriteIndented = true });
@@ -375,7 +355,6 @@ public class LoadoutData
 {
     public string Name { get; set; }
     public DateTime SavedAt { get; set; }
-    //public Dictionary<string, int> ShopItems { get; set; }
     public string LinkedCharacter { get; set; }
     public List<string> InactivatedUnlockables { get; set; }
 }

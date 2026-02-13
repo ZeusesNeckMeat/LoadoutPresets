@@ -45,11 +45,9 @@ internal static class ButtonFactory
     {
         Main.Logger.LogDebug($"ButtonFactory: Starting creation of '{buttonName}' using template '{templateButton.name}'.");
 
-        // Clone the template button
         var clonedButton = UObject.Instantiate(templateButton);
         clonedButton.name = buttonName;
 
-        // Set parent - use custom parent if provided, otherwise use template's parent
         var targetParent = customParent ?? templateButton.transform.parent;
         clonedButton.transform.SetParent(targetParent, false);
 
@@ -64,10 +62,8 @@ internal static class ButtonFactory
             Main.Logger.LogDebug($"ButtonFactory: Set custom parent for '{buttonName}' under '{targetParent.name}'.");
         }
 
-        // Strip game-specific components
         StripNonVisualComponents(clonedButton);
 
-        // Configure icon
         var iconTransform = clonedButton.transform.Find("Icon");
         if (iconTransform)
         {
@@ -77,7 +73,6 @@ internal static class ButtonFactory
             }
             else
             {
-                // No icon requested - hide the icon
                 iconTransform.gameObject.SetActive(false);
                 Main.Logger.LogDebug($"ButtonFactory: No icon requested, hiding icon.");
             }
@@ -122,7 +117,6 @@ internal static class ButtonFactory
         if (rawImage == null)
             return;
 
-        // Search for the texture
         var healthIconTexture = Resources.FindObjectsOfTypeAll<Texture2D>()
             .FirstOrDefault(t => t.name == textureName);
 
@@ -135,7 +129,6 @@ internal static class ButtonFactory
         }
         else
         {
-            // Fallback: hide the icon if the texture isn't found
             iconTransform.gameObject.SetActive(false);
             Main.Logger.LogWarning($"Texture {textureName} not found. Hiding icon.");
         }
@@ -148,10 +141,9 @@ internal static class ButtonFactory
         var templateButtonComponent = templateSourceGameObject.GetComponent<MyButtonNormal>();
         var buttonImageComponent = targetButtonComponent.GetComponent<Image>();
 
-        // FIX: Ensure the Image has a sprite to prevent NullReferenceException during layout calculations
+        // Ensure the Image has a sprite to prevent NullReferenceException during layout calculations
         if (buttonImageComponent && buttonImageComponent.sprite == null)
         {
-            // Find Unity's built-in white sprite or use the template's sprite
             var templateImage = templateSourceGameObject.GetComponent<Image>();
             if (templateImage && templateImage.sprite != null)
             {
@@ -160,7 +152,6 @@ internal static class ButtonFactory
             }
             else
             {
-                // Fallback: Find any sprite in the scene to use
                 var anySprite = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault();
                 if (anySprite != null)
                 {
@@ -170,12 +161,10 @@ internal static class ButtonFactory
             }
         }
 
-        // Link Background Image
         zombieButtonComponent.background = buttonImageComponent;
         targetButtonComponent.transition = Selectable.Transition.None;
         Main.Logger.LogDebug($"ButtonFactory: Linked background image to '{targetGameObject.name}' and disabled standard transitions.");
 
-        // Link Scaling Logic
         var textTransform = targetButtonComponent.transform.Find("T_Text");
         if (textTransform)
         {
@@ -192,7 +181,6 @@ internal static class ButtonFactory
             Main.Logger.LogWarning($"ButtonFactory: Could not find 'T_Text' child for scaling on '{targetGameObject.name}'.");
         }
 
-        // Link Colors
         if (templateButtonComponent)
         {
             zombieButtonComponent.defaultColor = templateButtonComponent.defaultColor;
@@ -243,7 +231,6 @@ internal static class ButtonFactory
 
         AddTrigger(eventTriggerComponent, EventTriggerType.Select, eventData =>
         {
-            // Check if button still exists
             if (targetButtonComponent == null || targetButtonComponent.WasCollected)
             {
                 Main.Logger.LogDebug("Button Event [Select]: Button was destroyed, skipping.");
@@ -261,7 +248,6 @@ internal static class ButtonFactory
 
         AddTrigger(eventTriggerComponent, EventTriggerType.Deselect, eventData =>
         {
-            // Check if button still exists
             if (targetButtonComponent == null || targetButtonComponent.WasCollected)
             {
                 Main.Logger.LogDebug("Button Event [Deselect]: Button was destroyed, skipping.");
@@ -285,7 +271,6 @@ internal static class ButtonFactory
 
         AddTrigger(eventTriggerComponent, EventTriggerType.PointerClick, eventData =>
         {
-            // Check if button still exists
             if (targetButtonComponent == null || targetButtonComponent.WasCollected)
             {
                 Main.Logger.LogDebug("Button Event [PointerClick]: Button was destroyed, skipping.");
@@ -304,55 +289,6 @@ internal static class ButtonFactory
         Main.Logger.LogDebug($"ButtonFactory: Configured EventTriggers (Select, Deselect, PointerClick) for '{targetButtonComponent.gameObject.name}'.");
     }
 
-    //private static void SetupEventTriggers(Button targetButtonComponent)
-    //{
-    //    var eventTriggerComponent = targetButtonComponent.gameObject.AddComponent<EventTrigger>();
-    //    AddTrigger(eventTriggerComponent, EventTriggerType.Select, eventData =>
-    //    {
-    //        Main.Logger.LogDebug("Log 1");
-    //        if (!TryGetButtonFromEventData(eventData, EventTriggerType.PointerClick, out var eventButton))
-    //            return;
-
-    //        Main.Logger.LogDebug($"Button Event: '{eventButton.gameObject.name}' Selected.");
-    //        eventButton.GetComponent<MyButtonNormal>()?.StartHover();
-    //    });
-
-    //    AddTrigger(eventTriggerComponent, EventTriggerType.Deselect, eventData =>
-    //    {
-    //        Main.Logger.LogDebug("Log 3");
-    //        if (!TryGetButtonFromEventData(eventData, EventTriggerType.Deselect, out var eventButton))
-    //            return;
-
-    //        if (eventButton.gameObject == null
-    //            || eventButton.gameObject.WasCollected)
-    //        {
-    //            Main.Logger.LogWarning("Button Event: Deselect triggered but event button GameObject is missing or destroyed.");
-    //            return;
-    //        }
-
-    //        var eventButtonName = eventButton.gameObject.name;
-    //        Main.Logger.LogDebug($"Button Event: Attempting to find and disable 'DisabledOverlay' for '{eventButtonName}' if it exists.");
-    //        var overlayTransform = eventButton.transform.Find("DisabledOverlay");
-    //        if (overlayTransform)
-    //        {
-    //            Main.Logger.LogDebug($"Button Event: Found 'DisabledOverlay' for '{eventButtonName}', setting it inactive.");
-    //            overlayTransform.gameObject.SetActive(false);
-    //        }
-    //    });
-
-    //    AddTrigger(eventTriggerComponent, EventTriggerType.PointerClick, eventData =>
-    //    {
-    //        Main.Logger.LogDebug("Log 5");
-    //        if (!TryGetButtonFromEventData(eventData, EventTriggerType.PointerClick, out var eventButton))
-    //            return; // Logs happen inside TryGetButtonFromEventData for detailed diagnostics
-
-    //        Main.Logger.LogDebug($"Button Event: '{targetButtonComponent.gameObject.name}' PointerClick.");
-    //        eventButton.GetComponent<MyButtonNormal>()?.StartHover();
-    //    });
-
-    //    Main.Logger.LogDebug($"ButtonFactory: Configured EventTriggers (Select, Deselect, PointerClick) for '{targetButtonComponent.gameObject.name}'.");
-    //}
-
     private static void AddTrigger(EventTrigger triggerComponent, EventTriggerType triggerType, Action<BaseEventData> triggerAction)
     {
         var eventEntry = new EventTrigger.Entry
@@ -362,35 +298,5 @@ internal static class ButtonFactory
 
         eventEntry.callback.AddListener(triggerAction);
         triggerComponent.triggers.Add(eventEntry);
-    }
-
-    private static bool TryGetButtonFromEventData(BaseEventData eventData, EventTriggerType eventTriggerType, out Button button)
-    {
-        button = null;
-        if (eventData == null
-            || eventData.WasCollected
-            || eventData.selectedObject == null
-            || eventData.selectedObject.WasCollected)
-        {
-            Main.Logger.LogWarning($"Button Event [{eventTriggerType}]: Received invalid event data (null or collected).");
-            return false;
-        }
-
-        button = eventData.selectedObject.GetComponent<Button>();
-
-        if (button == null)
-        {
-            Main.Logger.LogWarning($"Button Event [{eventTriggerType}]: eventData.selectedObject.GetComponent<Button>() returned null.");
-            return false;
-        }
-
-        if (button.WasCollected)
-        {
-            Main.Logger.LogWarning($"Button Event [{eventTriggerType}]: Button component was collected.");
-            return false;
-        }
-
-        Main.Logger.LogDebug($"Button Event [{eventTriggerType}]: Successfully retrieved Button component from event data.");
-        return true;
     }
 }

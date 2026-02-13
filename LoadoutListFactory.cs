@@ -177,11 +177,15 @@ internal static class LoadoutListFactory
         }
 
         // ========== CHARACTER SELECTOR BUTTON (Middle ~25%) ==========
+        var characterData = linkedCharacter.HasValue ? DataManager.Instance.characterData[linkedCharacter.Value] : null;
+        var characterDisplayName = characterData != null ? characterData.GetName() : "None";
+        var characterIconName = characterData?.icon?.name;
+
         var characterButton = ButtonFactory.CreateNativeButton(
             _buttonTemplate,
             "B_CharacterSelector",
-            CharacterName.GetDisplayNameForCharacter(linkedCharacter),
-            CharacterIcon.GetIconNameForCharacter(linkedCharacter),
+            characterDisplayName,
+            characterIconName,
             itemObj.transform
         );
 
@@ -210,61 +214,17 @@ internal static class LoadoutListFactory
                 if (pointerData.button == PointerEventData.InputButton.Left)
                 {
                     // Left-click: Open character select
-                    Main.Logger.LogInfo($"LoadoutListFactory: Character selector left-clicked for '{loadoutName}'.");
+                    Main.Logger.LogDebug($"LoadoutListFactory: Character selector left-clicked for '{loadoutName}'.");
                     OnCharacterSelectorClicked(loadoutName);
                 }
                 else if (pointerData.button == PointerEventData.InputButton.Right)
                 {
                     // Right-click: Remove linked character
-                    Main.Logger.LogInfo($"LoadoutListFactory: Character selector right-clicked for '{loadoutName}'.");
+                    Main.Logger.LogDebug($"LoadoutListFactory: Character selector right-clicked for '{loadoutName}'.");
                     OnCharacterSelectorRightClicked(loadoutName);
                 }
             }));
         }
-
-        //characterButton.onClick.RemoveAllListeners();
-        //characterButton.onClick.AddListener(new Action(() => OnCharacterSelectorClicked(loadoutName)));
-
-        //// ADD RIGHT-CLICK HANDLER TO REMOVE CHARACTER
-        //var eventTrigger = characterButton.gameObject.GetOrAddComponent<EventTrigger>();
-
-        //for (int i = eventTrigger.triggers.Count - 1; i >= 0; i--)
-        //{
-        //    if (eventTrigger.triggers[i].eventID == EventTriggerType.PointerUp)
-        //    {
-        //        eventTrigger.triggers.RemoveAt(i);
-        //    }
-        //}
-
-        //var rightClickEntry = new EventTrigger.Entry
-        //{
-        //    eventID = EventTriggerType.PointerUp,
-        //};
-        //rightClickEntry.callback.AddListener(new Action<BaseEventData>((eventData) =>
-        //{
-        //    try
-        //    {
-        //        var pointerData = eventData.TryCast<PointerEventData>();
-        //        if (pointerData == null)
-        //        {
-        //            Main.Logger.LogDebug($"Event data is not PointerEventData for '{loadoutName}' - Type: {eventData?.GetType().Name ?? "NULL"}");
-        //            return;
-        //        }
-
-        //        if (pointerData.button != PointerEventData.InputButton.Right)
-        //        {
-        //            Main.Logger.LogDebug($"PointerEventData button is not Right for '{loadoutName}' - Button: {pointerData.button}");
-        //            return;
-        //        }
-
-        //        OnCharacterSelectorRightClicked(loadoutName);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Main.Logger.LogError($"Error in right-click handler for '{loadoutName}': {ex.Message}");
-        //    }
-        //}));
-        //eventTrigger.triggers.Add(rightClickEntry);
 
         var charRect = characterButton.GetComponent<RectTransform>();
         charRect.anchorMin = new Vector2(0.32f, 0.1f);
@@ -329,26 +289,26 @@ internal static class LoadoutListFactory
 
     private static void OnCharacterSelectorClicked(string loadoutName)
     {
-        Main.Logger.LogInfo($"LoadoutListFactory: Character selector clicked for '{loadoutName}'.");
+        Main.Logger.LogDebug($"LoadoutListFactory: Character selector clicked for '{loadoutName}'.");
         LoadoutsMenu.OpenCharacterSelect(loadoutName);
     }
 
     private static void OnCharacterSelectorRightClicked(string loadoutName)
     {
-        Main.Logger.LogInfo($"LoadoutListFactory: Character selector right-clicked for '{loadoutName}' - removing linked character.");
+        Main.Logger.LogDebug($"LoadoutListFactory: Character selector right-clicked for '{loadoutName}' - removing linked character.");
         Main.RemoveLoadoutCharacter(loadoutName);
     }
 
     private static void OnLoadClicked(string loadoutName)
     {
-        Main.Logger.LogInfo($"LoadoutListFactory: Loading loadout '{loadoutName}'...");
+        Main.Logger.LogDebug($"LoadoutListFactory: Loading loadout '{loadoutName}'...");
         Main.ActivateLoadout(loadoutName);
         LoadoutsMenu.CloseMenu();
     }
 
     private static void OnDeleteClicked(string loadoutName)
     {
-        Main.Logger.LogInfo($"LoadoutListFactory: Deleting loadout '{loadoutName}'...");
+        Main.Logger.LogDebug($"LoadoutListFactory: Deleting loadout '{loadoutName}'...");
         Main.DeleteLoadout(loadoutName);
 
         TryRemoveLoadoutListItem(loadoutName);
@@ -382,7 +342,7 @@ internal static class LoadoutListFactory
             var newText = characterData?.GetName() ?? "None";
             if (tmpText && !string.Equals(tmpText.text, newText, StringComparison.OrdinalIgnoreCase))
             {
-                Main.Logger.LogInfo($"UpdateLoadoutItem: Updating text from '{tmpText.text}' to '{newText}' for '{loadoutName}'");
+                Main.Logger.LogDebug($"UpdateLoadoutItem: Updating text from '{tmpText.text}' to '{newText}' for '{loadoutName}'");
                 tmpText.text = newText;
             }
             else if (tmpText)
@@ -416,7 +376,7 @@ internal static class LoadoutListFactory
                         rawImage.texture = iconTexture;
                         rawImage.color = Color.white;
                         iconTransform.gameObject.SetActive(true);
-                        Main.Logger.LogInfo($"UpdateLoadoutItem: Updated icon to '{iconName}' for '{loadoutName}'");
+                        Main.Logger.LogDebug($"UpdateLoadoutItem: Updated icon to '{iconName}' for '{loadoutName}'");
                     }
                     else
                     {

@@ -50,7 +50,7 @@ internal static class LoadoutsMenu
         _loadoutListContainer = _loadoutsMenuPanel.transform.Find("WindowLayers/Content/ScrollRect/ContentEntries");
         if (_loadoutListContainer)
         {
-            Main.Logger.LogInfo($"LoadoutsMenu: Found ContentEntries container");
+            Main.Logger.LogDebug($"LoadoutsMenu: Found ContentEntries container");
         }
         else
         {
@@ -59,7 +59,7 @@ internal static class LoadoutsMenu
             if (scrollRect && scrollRect.content)
             {
                 _loadoutListContainer = scrollRect.content;
-                Main.Logger.LogInfo("LoadoutsMenu: Using ScrollRect.content as container.");
+                Main.Logger.LogDebug("LoadoutsMenu: Using ScrollRect.content as container.");
             }
         }
 
@@ -71,7 +71,7 @@ internal static class LoadoutsMenu
             _loadoutsMenuPanel.transform
         );
 
-        Main.Logger.LogInfo("LoadoutsMenu: Menu created successfully.");
+        Main.Logger.LogDebug("LoadoutsMenu: Menu created successfully.");
     }
 
     /// <summary>
@@ -151,7 +151,7 @@ internal static class LoadoutsMenu
         if (_loadoutsMenuPanel)
         {
             _loadoutsMenuPanel.SetActive(false);
-            Main.Logger.LogInfo("LoadoutsMenu: Menu closed.");
+            Main.Logger.LogDebug("LoadoutsMenu: Menu closed.");
         }
 
         if (_mainMenuPanel)
@@ -185,7 +185,7 @@ internal static class LoadoutsMenu
             return;
         }
 
-        Main.Logger.LogInfo($"LoadoutsMenu: Opening character select for loadout '{loadoutName}'.");
+        Main.Logger.LogDebug($"LoadoutsMenu: Opening character select for loadout '{loadoutName}'.");
 
         if (!_loadoutsMenuPanel.activeSelf)
         {
@@ -215,7 +215,7 @@ internal static class LoadoutsMenu
             return;
         }
 
-        Main.Logger.LogInfo($"LoadoutsMenu: Character '{selectedCharacter}' selected for loadout '{_loadoutBeingEdited}'.");
+        Main.Logger.LogDebug($"LoadoutsMenu: Character '{selectedCharacter}' selected for loadout '{_loadoutBeingEdited}'.");
 
         // Update the loadout's linked character
         LoadoutPresets.UpdateLoadoutCharacter(_loadoutBeingEdited, selectedCharacter);
@@ -258,7 +258,17 @@ internal static class LoadoutsMenu
         foreach (var loadout in allLoadouts)
         {
             Main.Logger.LogDebug($"LoadoutsMenu: Processing loadout '{loadout.Name}' with linked character '{loadout.LinkedCharacter}'");
-            var linkedCharacter = CharacterName.GetEnumFromDisplayName(loadout.LinkedCharacter);
+            ECharacter? linkedCharacter = null;
+            
+            for (var i = 0; i < DataManager.Instance.unsortedCharacterData.Count; i++)
+            {
+                var characterData = DataManager.Instance.unsortedCharacterData[i];
+                if (characterData.GetName() == loadout.LinkedCharacter)
+                {
+                    linkedCharacter = characterData.eCharacter;
+                    break;
+                }
+            }
 
             LoadoutListFactory.CreateLoadoutListItem(
                 loadout.Name,
@@ -268,7 +278,7 @@ internal static class LoadoutsMenu
             );
         }
 
-        Main.Logger.LogInfo("LoadoutsMenu: Loadout list refreshed.");
+        Main.Logger.LogDebug("LoadoutsMenu: Loadout list refreshed.");
     }
 
     public static void AddLoadoutListItem(string loadoutName)

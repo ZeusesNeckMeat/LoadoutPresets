@@ -22,13 +22,17 @@ internal static class GameManager_OnPlayerInit_Patch
     {
         try
         {
-            Main.Logger.LogDebug($"Is First Stage: {MapController.IsFirstStage()}");
+            if (!MapController.IsFirstStage())
+            {
+                Main.Logger.LogDebug("Not first stage, skipping loadout activation.");
+                return;
+            }
 
-            Main.Logger.LogInfo("GameManager.OnPlayerInit");
-            Main.Logger.LogInfo($"Current unlockables count: {RunUnlockables.availableItems?.Count}");
+            Main.Logger.LogDebug("GameManager.OnPlayerInit");
+            Main.Logger.LogDebug($"Current unlockables count: {RunUnlockables.availableItems?.Count}");
 
-            Main.Logger.LogInfo($"Player instance from GameManager: {__instance?.player?.character}");
-            Main.Logger.LogInfo($"CharacterData from Inventory: {inventory?.characterData?.eCharacter}");
+            Main.Logger.LogDebug($"Player instance from GameManager: {__instance?.player?.character}");
+            Main.Logger.LogDebug($"CharacterData from Inventory: {inventory?.characterData?.eCharacter}");
 
             Main.ActivateLoadoutFromCharacter(__instance?.player?.character);
         }
@@ -116,16 +120,15 @@ internal static class MyButtonCharacter_SetCharacter_Patch
                     eventID = EventTriggerType.PointerClick
                 };
 
-                // Add our callback
+                // Inject callback
                 entry.callback.AddListener(new Action<BaseEventData>((eventData) =>
                 {
-                    //__instance.StartHover();
                     try
                     {
                         var currentLoadout = LoadoutsMenu.GetCurrentEditingLoadout();
                         if (!string.IsNullOrEmpty(currentLoadout))
                         {
-                            Main.Logger.LogInfo($"EventTrigger: Character button clicked while editing loadout '{currentLoadout}' - Character: {eCharacter}");
+                            Main.Logger.LogDebug($"EventTrigger: Character button clicked while editing loadout '{currentLoadout}' - Character: {eCharacter}");
                             LoadoutsMenu.OnCharacterSelected(eCharacter);
                         }
                     }
@@ -139,7 +142,7 @@ internal static class MyButtonCharacter_SetCharacter_Patch
                 eventTrigger.triggers.Insert(0, entry);
                 Main.Logger.LogDebug($"Added EventTrigger listener for character: {eCharacter}");
 
-                //// Destroy unneeded components
+                // Deactivate unneeded components
                 var instanceTransform = __instance.transform;
                 Main.Logger.LogDebug($"Cleaning up button components for {eCharacter} - Parent: {instanceTransform?.name}");
                 var characterSelectedOverlayTransform = instanceTransform.Find("CharacterSelectedOverlay");
@@ -147,7 +150,6 @@ internal static class MyButtonCharacter_SetCharacter_Patch
                 {
                     Main.Logger.LogDebug("Disabling CharacterSelectedOverlay game object");
                     characterSelectedOverlayTransform.gameObject.SetActive(false);
-                    //UnityEngine.Object.Destroy(characterSelectedOverlayTransform.gameObject);
                 }
 
                 var rankTransform = instanceTransform.Find("T_Rank");
@@ -155,7 +157,6 @@ internal static class MyButtonCharacter_SetCharacter_Patch
                 {
                     Main.Logger.LogDebug("Disabling T_Rank game object");
                     rankTransform.gameObject.SetActive(false);
-                    //UnityEngine.Object.Destroy(rankTransform.gameObject);
                 }
 
                 var starTransform = instanceTransform.Find("Star");
@@ -163,7 +164,6 @@ internal static class MyButtonCharacter_SetCharacter_Patch
                 {
                     Main.Logger.LogDebug("Disabling Star game object");
                     starTransform.gameObject.SetActive(false);
-                    //UnityEngine.Object.Destroy(starTransform.gameObject);
                 }
 
                 var requiresPurchaseTransform = instanceTransform.Find("RequiresPurchase (1)");
@@ -171,7 +171,6 @@ internal static class MyButtonCharacter_SetCharacter_Patch
                 {
                     Main.Logger.LogDebug("Disabling RequiresPurchase game object");
                     requiresPurchaseTransform.gameObject.SetActive(false);
-                    //UnityEngine.Object.Destroy(requiresPurchaseTransform.gameObject);
                 }
             }
             else
@@ -185,16 +184,5 @@ internal static class MyButtonCharacter_SetCharacter_Patch
         {
             Main.Logger.LogError($"Error in MyButtonCharacter_SetCharacter_Patch: {ex.Message}\n{ex.StackTrace}");
         }
-    }
-
-    /// <summary>
-    /// Clears all cached button data.
-    /// Call this when the character select menu is destroyed/recreated.
-    /// </summary>
-    public static void ClearCache()
-    {
-        Main.Logger.LogInfo($"MyButtonCharacter_SetCharacter_Patch: Clearing cache ({_hookedButtons.Count} buttons, {CharacterCache.Count} cached characters)");
-        _hookedButtons.Clear();
-        CharacterCache.Clear();
     }
 }

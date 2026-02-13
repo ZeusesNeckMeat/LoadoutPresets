@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 using Main = LoadoutPresets.LoadoutPresets;
@@ -18,34 +16,24 @@ internal static class CharacterSelectFactory
             return null;
         }
 
-        //CacheGridTemplate(characterGridTemplate);
-
         var clonedCharacterSelect = UObject.Instantiate(characterSelectTemplate, newParent);
         clonedCharacterSelect.name = "W_LoadoutCharacterSelector";
         clonedCharacterSelect.SetActive(false);
 
-        // Strip game-specific components recursively
         StripGameLogicFromMenu(clonedCharacterSelect);
 
         ModifyCharacterSelectStructure(clonedCharacterSelect);
 
-        Main.Logger.LogInfo("CharacterSelectFactory: Successfully cloned character grid for Loadouts menu.");
+        Main.Logger.LogDebug("CharacterSelectFactory: Successfully cloned character grid for Loadouts menu.");
         return clonedCharacterSelect;
     }
 
-    /// <summary>
-    /// Recursively strips game-specific components while preserving visual components.
-    /// MINIMAL DESTRUCTION APPROACH: Only remove what breaks our custom behavior.
-    /// </summary>
     private static void StripGameLogicFromMenu(GameObject characterSelect)
     {
-        // Find the B_Back button - we'll configure it instead of destroying/recreating
         var backButton = characterSelect.transform.Find("Header/Header/B_Back");
-
-        // Find CharacterPrefabUI template and SKIP IT ENTIRELY
         var characterPrefabUI = characterSelect.GetComponentInChildren<CharacterPrefabUI>(true);
 
-        // Find and DEACTIVATE (not destroy) the stats panel
+        // Deactivate W_Stats panel since it's part of the clone and we aren't using it (destroying it breaks things)
         var rootTransform = characterSelect.transform;
         for (int i = 0; i < rootTransform.childCount; i++)
         {
@@ -58,7 +46,6 @@ internal static class CharacterSelectFactory
             }
         }
 
-        // Get all transforms
         var allTransforms = characterSelect.GetComponentsInChildren<Transform>(true);
         Main.Logger.LogDebug($"CharacterSelectFactory: Processing {allTransforms.Length} GameObjects in hierarchy.");
 
@@ -67,16 +54,15 @@ internal static class CharacterSelectFactory
             if (transform == null)
                 continue;
 
-            // SKIP ENTIRE SUBTREE of CharacterPrefabUI - leave it COMPLETELY alone
+            // Don't destroy components in CharacterPrefabUI subtree
             if (characterPrefabUI && (transform == characterPrefabUI.transform || transform.IsChildOf(characterPrefabUI.transform)))
             {
                 Main.Logger.LogDebug($"CharacterSelectFactory: Skipping CharacterPrefabUI subtree for '{transform.name}'.");
                 continue;
             }
 
-            // Process components - ONLY destroy localization
+            // Destroy localization components
             var allComponents = transform.GetComponents<Component>();
-
             foreach (var component in allComponents)
             {
                 if (component == null) continue;
@@ -92,16 +78,16 @@ internal static class CharacterSelectFactory
             }
         }
 
+        if (!backButton)
+            return;
+
         // Configure B_Back button instead of recreating it
-        if (backButton)
+        var button = backButton.GetComponent<Button>();
+        if (button)
         {
-            var button = backButton.GetComponent<Button>();
-            if (button)
-            {
-                button.onClick.RemoveAllListeners();
-                button.onClick.AddListener(new System.Action(LoadoutsMenu.CloseCharacterSelect));
-                Main.Logger.LogDebug("CharacterSelectFactory: Configured B_Back button with close handler.");
-            }
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(new System.Action(LoadoutsMenu.CloseCharacterSelect));
+            Main.Logger.LogDebug("CharacterSelectFactory: Configured B_Back button with close handler.");
         }
     }
 

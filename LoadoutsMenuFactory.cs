@@ -29,7 +29,7 @@ internal static class LoadoutsMenuFactory
     /// </summary>
     public static GameObject CloneCreditsAsLoadoutsMenu(GameObject creditsTemplate, Transform newParent)
     {
-        Main.Logger.LogInfo("MenuFactory: Starting Credits → Loadouts menu clone.");
+        Main.Logger.LogDebug("MenuFactory: Starting Credits → Loadouts menu clone.");
 
         // Cache button template BEFORE cloning - need to access main menu
         CacheButtonTemplate(creditsTemplate);
@@ -47,7 +47,7 @@ internal static class LoadoutsMenuFactory
         // Modify structure for our needs
         ModifyLoadoutsMenuStructure(clonedMenu);
 
-        Main.Logger.LogInfo("MenuFactory: Clone complete.");
+        Main.Logger.LogDebug("MenuFactory: Clone complete.");
         return clonedMenu;
     }
 
@@ -439,7 +439,7 @@ internal static class LoadoutsMenuFactory
         openRect.anchoredPosition = Vector2.zero;
         openRect.sizeDelta = Vector2.zero;
 
-        Main.Logger.LogInfo("MenuFactory: Fixed sub-header section created successfully.");
+        Main.Logger.LogDebug("MenuFactory: Fixed sub-header section created successfully.");
     }
 
     /// <summary>
