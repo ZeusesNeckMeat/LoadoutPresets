@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 
 using TMPro;
 
 using UnityEngine;
 using UnityEngine.UI;
 
+using ButtonNames = LoadoutPresets.Constants.ButtonNames;
 using Main = LoadoutPresets.LoadoutPresets;
 using UObject = UnityEngine.Object;
-using ButtonNames = LoadoutPresets.Constants.ButtonNames;
 
 namespace LoadoutPresets;
 
@@ -19,7 +18,7 @@ namespace LoadoutPresets;
 /// </summary>
 internal static class LoadoutsMenuFactory
 {
-    private static GameObject _buttonTemplate; // Cache button template
+    private static GameObject _buttonTemplate;
 
     /// <summary>
     /// Clones the Credits menu and prepares it as a Loadouts menu.
@@ -31,20 +30,16 @@ internal static class LoadoutsMenuFactory
     {
         Main.Logger.LogDebug("MenuFactory: Starting Credits → Loadouts menu clone.");
 
-        // Cache button template BEFORE cloning - need to access main menu
         CacheButtonTemplate(creditsTemplate);
 
-        // Clone the entire menu structure
         var clonedMenu = UObject.Instantiate(creditsTemplate, newParent);
         clonedMenu.name = "W_LoadoutPresets";
-        clonedMenu.SetActive(false); // Start hidden
+        clonedMenu.SetActive(false);
 
         clonedMenu.GetComponent<RectTransform>().pivot = new Vector2(0.2f, 0.5f);
 
-        // Strip game-specific components recursively
         StripGameLogicFromMenu(clonedMenu);
 
-        // Modify structure for our needs
         ModifyLoadoutsMenuStructure(clonedMenu);
 
         Main.Logger.LogDebug("MenuFactory: Clone complete.");
@@ -57,9 +52,7 @@ internal static class LoadoutsMenuFactory
     /// </summary>
     private static void CacheButtonTemplate(GameObject creditsTemplate)
     {
-        // Instead of using B_Back (which has no text), find the Settings button from the main menu
-        // We need to go up to the UI root and find the Settings button
-        var creditsParent = creditsTemplate.transform.parent; // This should be "Tabs"
+        var creditsParent = creditsTemplate.transform.parent;
         if (!creditsParent)
         {
             Main.Logger.LogWarning("MenuFactory: Could not find Credits parent (Tabs).");
@@ -84,7 +77,6 @@ internal static class LoadoutsMenuFactory
             return;
         }
 
-        // Fallback to B_Back if Settings not found
         var backButton = creditsTemplate.transform.Find("Header/Header/B_Back");
         if (backButton)
         {
@@ -98,101 +90,12 @@ internal static class LoadoutsMenuFactory
 
     /// <summary>
     /// Recursively strips game-specific components while preserving visual components.
-    /// Based on ButtonFactory.StripNonVisualComponents but for entire hierarchy.
-    /// </summary>
-    //private static void StripGameLogicFromMenu(GameObject menuRoot)
-    //{
-    //    var componentsToPreserve = new HashSet<string>
-    //    {
-    //        "RectTransform",
-    //        "CanvasRenderer",
-    //        "Image",
-    //        "RawImage",
-    //        "Mask",
-    //        "TextMeshProUGUI",
-    //        "ScrollRect",
-    //        "Scrollbar",
-    //        "LayoutElement",
-    //        "LayoutGroup",
-    //        "HorizontalLayoutGroup",
-    //        "VerticalLayoutGroup",
-    //        "GridLayoutGroup",
-    //        "ContentSizeFitter",
-    //        "Canvas",
-    //        "GraphicRaycaster",
-    //        "CanvasGroup"
-    //    };
-
-    //    // Find the B_Back button in the cloned menu to preserve it
-    //    var backButton = menuRoot.transform.Find("Header/Header/B_Back");
-
-    //    // Process all GameObjects in hierarchy
-    //    var allTransforms = menuRoot.GetComponentsInChildren<Transform>(true);
-    //    Main.Logger.LogDebug($"MenuFactory: Processing {allTransforms.Length} GameObjects in hierarchy.");
-
-    //    foreach (var transform in allTransforms)
-    //    {
-    //        // Special handling for B_Back - only destroy its Button/EventTrigger components
-    //        if (backButton && transform == backButton)
-    //        {
-    //            var components = transform.GetComponents<Component>();
-    //            foreach (var component in components)
-    //            {
-    //                if (component == null) continue;
-    //                var typeName = component.GetIl2CppType().Name;
-
-    //                if (typeName == "Button" || typeName == "EventTrigger")
-    //                {
-    //                    Main.Logger.LogDebug($"MenuFactory: Destroying '{typeName}' on B_Back (will recreate).");
-    //                    UObject.DestroyImmediate(component);
-    //                }
-    //            }
-    //            continue;
-    //        }
-
-    //        var allComponents = transform.GetComponents<Component>();
-
-    //        foreach (var component in allComponents)
-    //        {
-    //            if (component == null) continue;
-
-    //            var typeName = component.GetIl2CppType().Name;
-
-    //            // Keep essential Unity UI components
-    //            if (componentsToPreserve.Contains(typeName))
-    //                continue;
-
-    //            // Destroy localization (prevents text reverts, same as ButtonFactory)
-    //            if (typeName.Contains("Localize"))
-    //            {
-    //                Main.Logger.LogDebug($"MenuFactory: Destroying '{typeName}' on '{transform.name}'.");
-    //                UObject.DestroyImmediate(component);
-    //                continue;
-    //            }
-
-    //            // Destroy game-specific components
-    //            if (typeName.Contains("Credits") ||
-    //                typeName.Contains("Tab") ||
-    //                typeName == "Button" ||
-    //                typeName == "EventTrigger")
-    //            {
-    //                Main.Logger.LogDebug($"MenuFactory: Destroying game component '{typeName}' on '{transform.name}'.");
-    //                UObject.DestroyImmediate(component);
-    //            }
-    //        }
-    //    }
-    //}
-
-    /// <summary>
-    /// Recursively strips game-specific components while preserving visual components.
     /// MINIMAL DESTRUCTION APPROACH: Only remove what breaks our custom behavior.
     /// </summary>
     private static void StripGameLogicFromMenu(GameObject menuRoot)
     {
-        // Find the B_Back button - we'll configure it instead of destroying/recreating
         var backButton = menuRoot.transform.Find("Header/Header/B_Back");
 
-        // Process all GameObjects in hierarchy
         var allTransforms = menuRoot.GetComponentsInChildren<Transform>(true);
         Main.Logger.LogDebug($"MenuFactory: Processing {allTransforms.Length} GameObjects in hierarchy.");
 
@@ -206,7 +109,6 @@ internal static class LoadoutsMenuFactory
 
                 var typeName = component.GetIl2CppType().Name;
 
-                // ONLY destroy localization components (these prevent our custom text)
                 if (typeName.Contains("Localize"))
                 {
                     Main.Logger.LogDebug($"MenuFactory: Destroying localization component '{typeName}' on '{transform.name}'.");
@@ -214,7 +116,6 @@ internal static class LoadoutsMenuFactory
                     continue;
                 }
 
-                // Destroy Credits/Tab specific components (but keep Button/MyButton/EventTrigger)
                 if (typeName.Contains("Credits") || typeName.Contains("Tab"))
                 {
                     Main.Logger.LogDebug($"MenuFactory: Destroying game component '{typeName}' on '{transform.name}'.");
@@ -223,7 +124,6 @@ internal static class LoadoutsMenuFactory
             }
         }
 
-        // Configure B_Back button instead of recreating it
         if (backButton)
         {
             var button = backButton.GetComponent<Button>();
@@ -241,7 +141,6 @@ internal static class LoadoutsMenuFactory
     /// </summary>
     private static void ModifyLoadoutsMenuStructure(GameObject menu)
     {
-        // Update title
         var titleTransform = menu.transform.Find("Header/Header/T_Title");
         if (titleTransform)
         {
@@ -273,7 +172,6 @@ internal static class LoadoutsMenuFactory
             }
         }
 
-        // Remove tab buttons if they exist
         var tabButtons = menu.transform.Find("TabButtons");
         if (tabButtons)
         {
@@ -281,10 +179,6 @@ internal static class LoadoutsMenuFactory
             Main.Logger.LogDebug("MenuFactory: Removed tab buttons.");
         }
 
-        // Recreate the B_Back button
-        //RecreateBackButton(menu);
-
-        // Add action controls (Input field + Save button + Open Folder button)
         AddActionControls(menu);
     }
 
@@ -300,7 +194,6 @@ internal static class LoadoutsMenuFactory
             return;
         }
 
-        // Find the main content area
         var contentTransform = menu.transform.Find("WindowLayers/Content");
         if (!contentTransform)
         {
@@ -308,7 +201,6 @@ internal static class LoadoutsMenuFactory
             return;
         }
 
-        // ========== REMOVE THE HORIZONTAL LAYOUT GROUP ==========
         var horizontalLayoutGroup = contentTransform.GetComponent<HorizontalLayoutGroup>();
         if (horizontalLayoutGroup)
         {
@@ -316,7 +208,6 @@ internal static class LoadoutsMenuFactory
             UObject.DestroyImmediate(horizontalLayoutGroup);
         }
 
-        // ========== ADD A VERTICAL LAYOUT GROUP TO STACK SUB-HEADER AND SCROLLRECT ==========
         var verticalLayoutGroup = contentTransform.gameObject.AddComponent<VerticalLayoutGroup>();
         verticalLayoutGroup.childControlWidth = true;
         verticalLayoutGroup.childControlHeight = true;
@@ -334,26 +225,22 @@ internal static class LoadoutsMenuFactory
 
         Main.Logger.LogDebug("MenuFactory: Added VerticalLayoutGroup to Content.");
 
-        // ========== CREATE FIXED SUB-HEADER SECTION ==========
         var subHeaderContainer = new GameObject("SubHeader");
         subHeaderContainer.transform.SetParent(contentTransform, false);
         subHeaderContainer.transform.SetAsFirstSibling();
 
         var subHeaderRect = subHeaderContainer.AddComponent<RectTransform>();
 
-        // Add LayoutElement to control size within VerticalLayoutGroup
         var subHeaderLayout = subHeaderContainer.AddComponent<LayoutElement>();
         subHeaderLayout.minHeight = 70f;
         subHeaderLayout.preferredHeight = 70f;
         subHeaderLayout.flexibleHeight = 0f;
 
-        // Optional: Add background to sub-header
         var subHeaderBg = subHeaderContainer.AddComponent<Image>();
         subHeaderBg.color = new Color(0.05f, 0.05f, 0.05f, 0.5f);
 
         Main.Logger.LogDebug("MenuFactory: Created SubHeader with fixed 20px height.");
 
-        // ========== MAKE SCROLLRECT FLEXIBLE (TAKES REMAINING SPACE) ==========
         var scrollRectTransform = menu.transform.Find("WindowLayers/Content/ScrollRect");
         if (scrollRectTransform)
         {
@@ -366,10 +253,8 @@ internal static class LoadoutsMenuFactory
             Main.Logger.LogDebug("MenuFactory: Configured ScrollRect to take remaining vertical space.");
         }
 
-        // Get title text style for reference
         var titleText = menu.transform.Find("Header/Header/T_Title")?.GetComponent<TextMeshProUGUI>();
 
-        // ========== INPUT FIELD (Left side, ~46% width) ==========
         var inputFieldObj = new GameObject("LoadoutNameInput");
         inputFieldObj.transform.SetParent(subHeaderContainer.transform, false);
 
@@ -383,7 +268,6 @@ internal static class LoadoutsMenuFactory
         inputImage.color = new Color(0.1f, 0.1f, 0.1f, 0.9f);
         inputImage.type = Image.Type.Sliced;
 
-        // Add border
         var borderObj = new GameObject("Border");
         borderObj.transform.SetParent(inputFieldObj.transform, false);
         var borderRect = borderObj.AddComponent<RectTransform>();
@@ -401,7 +285,6 @@ internal static class LoadoutsMenuFactory
 
         LoadoutsMenu.SetLoadoutNameInput(inputField);
 
-        // ========== SAVE BUTTON (Middle, ~17% width) ==========
         var saveButton = ButtonFactory.CreateNativeButton(
             _buttonTemplate,
             "B_SaveLoadout",
@@ -422,7 +305,6 @@ internal static class LoadoutsMenuFactory
         saveRect.anchoredPosition = Vector2.zero;
         saveRect.sizeDelta = Vector2.zero;
 
-        // ========== OPEN FOLDER BUTTON (Right, ~27% width) ==========
         var openButton = ButtonFactory.CreateNativeButton(
             _buttonTemplate,
             "B_OpenFolder",
@@ -457,7 +339,6 @@ internal static class LoadoutsMenuFactory
 
         var text = textObj.AddComponent<TextMeshProUGUI>();
 
-        // Match title font if available
         if (referenceText)
         {
             text.font = referenceText.font;
@@ -492,7 +373,6 @@ internal static class LoadoutsMenuFactory
         var placeholder = placeholderObj.AddComponent<TextMeshProUGUI>();
         placeholder.text = "New loadout name...";
 
-        // Match title font if available
         if (referenceText)
         {
             placeholder.font = referenceText.font;

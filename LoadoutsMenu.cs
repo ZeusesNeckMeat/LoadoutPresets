@@ -1,13 +1,11 @@
 ﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
 
 using System;
-using System.IO;
 using System.Linq;
 
 using TMPro;
 
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 using Main = LoadoutPresets.LoadoutPresets;
@@ -40,7 +38,6 @@ internal static class LoadoutsMenu
             return;
         }
 
-        // Clone using MenuFactory
         _loadoutsMenuPanel = LoadoutsMenuFactory.CloneCreditsAsLoadoutsMenu(
             creditsMenuTransform.gameObject,
             uiRoot.transform.Find("Tabs")
@@ -95,19 +92,12 @@ internal static class LoadoutsMenu
         }
 
         Main.Logger.LogDebug($"LoadoutsMenu: Attempting to open menu. Current active state: {_loadoutsMenuPanel.activeSelf}");
-
-        // Clear EventSystem selection BEFORE opening menu
-        //ClearEventSystemSelection();
-
-        
-
         Main.Logger.LogDebug($"_characterSelect has value: {_characterSelect != null}. Active state: {_characterSelect?.activeSelf}");
         _characterSelect.SetActive(false);
         
         Main.Logger.LogDebug($"_loadoutsMenuPanel parent: {_loadoutsMenuPanel.transform.parent?.name}. Attempting to hide parent menu if exists.");
         _loadoutsMenuPanel.transform.parent.Find("Menu")?.gameObject.SetActive(false);
 
-        // Clear input field and reset placeholder text
         Main.Logger.LogDebug("LoadoutsMenu: Clearing loadout name input field.");
         if (_loadoutNameInput)
         {
@@ -120,7 +110,6 @@ internal static class LoadoutsMenu
             }
         }
 
-        // Refresh loadout list
         RefreshLoadoutList();
 
         Main.Logger.LogDebug($"LoadoutsMenu: Deactivating main menu panel if exists. Current active state: {_mainMenuPanel?.activeSelf}, {_mainMenuPanel?.name}");
@@ -138,9 +127,6 @@ internal static class LoadoutsMenu
         _loadoutsMenuPanel.SetActive(true);
 
         Main.Logger.LogDebug($"LoadoutsMenu: Menu activated. New active state: {_loadoutsMenuPanel.activeSelf}");
-
-        // Ensure cursor is visible and unlocked
-        //EnsureCursorVisible();
     }
 
     /// <summary>
@@ -158,14 +144,6 @@ internal static class LoadoutsMenu
         {
             _mainMenuPanel.SetActive(true);
         }
-
-        //CloseCharacterSelect();
-
-        //// Clear EventSystem selection when closing
-        //ClearEventSystemSelection();
-
-        //// Ensure cursor is visible when closing
-        //EnsureCursorVisible();
 
         _loadoutsMenuPanel.transform.parent.Find("Menu")?.gameObject.SetActive(true);   
     }
@@ -193,12 +171,6 @@ internal static class LoadoutsMenu
             OpenMenu();
         }
 
-        // Clear EventSystem selection BEFORE opening character select
-        //ClearEventSystemSelection();
-
-        // Ensure cursor is visible
-        //EnsureCursorVisible();
-
         _characterSelect.SetActive(true);
     }
 
@@ -217,13 +189,9 @@ internal static class LoadoutsMenu
 
         Main.Logger.LogDebug($"LoadoutsMenu: Character '{selectedCharacter}' selected for loadout '{_loadoutBeingEdited}'.");
 
-        // Update the loadout's linked character
-        LoadoutPresets.UpdateLoadoutCharacter(_loadoutBeingEdited, selectedCharacter);
-
-        // Close the character select
+        Main.UpdateLoadoutCharacter(_loadoutBeingEdited, selectedCharacter);
         CloseCharacterSelect();
 
-        // Clear the current editing loadout
         _loadoutBeingEdited = null;
     }
 
@@ -248,13 +216,9 @@ internal static class LoadoutsMenu
             return;
         }
 
-        // Hide all cached items instead of destroying them
-        //LoadoutListFactory.HideAllCachedItems();
-
         var titleText = _loadoutsMenuPanel.transform.Find("Header/Header/T_Title")?.GetComponent<TextMeshProUGUI>();
         var allLoadouts = Main.LoadoutDatasCache().OrderBy(x => x.Name);
 
-        // Create or reuse cached items
         foreach (var loadout in allLoadouts)
         {
             Main.Logger.LogDebug($"LoadoutsMenu: Processing loadout '{loadout.Name}' with linked character '{loadout.LinkedCharacter}'");
@@ -298,8 +262,4 @@ internal static class LoadoutsMenu
         if (!LoadoutListFactory.TryUpdateLoadoutListItemCharacter(loadoutName, linkedCharacter))
             RefreshLoadoutList();
     }
-
-    // Accessors
-    public static Transform GetLoadoutListContainer() => _loadoutListContainer;
-    public static GameObject GetMenuPanel() => _loadoutsMenuPanel;
 }

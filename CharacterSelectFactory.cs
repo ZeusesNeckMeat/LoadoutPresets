@@ -33,7 +33,6 @@ internal static class CharacterSelectFactory
         var backButton = characterSelect.transform.Find("Header/Header/B_Back");
         var characterPrefabUI = characterSelect.GetComponentInChildren<CharacterPrefabUI>(true);
 
-        // Deactivate W_Stats panel since it's part of the clone and we aren't using it (destroying it breaks things)
         var rootTransform = characterSelect.transform;
         for (int i = 0; i < rootTransform.childCount; i++)
         {
@@ -54,22 +53,19 @@ internal static class CharacterSelectFactory
             if (transform == null)
                 continue;
 
-            // Don't destroy components in CharacterPrefabUI subtree
             if (characterPrefabUI && (transform == characterPrefabUI.transform || transform.IsChildOf(characterPrefabUI.transform)))
             {
                 Main.Logger.LogDebug($"CharacterSelectFactory: Skipping CharacterPrefabUI subtree for '{transform.name}'.");
                 continue;
             }
 
-            // Destroy localization components
             var allComponents = transform.GetComponents<Component>();
             foreach (var component in allComponents)
             {
-                if (component == null) continue;
+                if (component == null)
+                    continue;
 
                 var typeName = component.GetIl2CppType().Name;
-
-                // ONLY destroy localization components (these prevent our custom text)
                 if (typeName.Contains("Localize"))
                 {
                     Main.Logger.LogDebug($"CharacterSelectFactory: Destroying localization component '{typeName}' on '{transform.name}'.");
@@ -81,7 +77,6 @@ internal static class CharacterSelectFactory
         if (!backButton)
             return;
 
-        // Configure B_Back button instead of recreating it
         var button = backButton.GetComponent<Button>();
         if (button)
         {
@@ -97,34 +92,23 @@ internal static class CharacterSelectFactory
     /// </summary>
     private static void ModifyCharacterSelectStructure(GameObject characterSelectMenu)
     {
-        // ========== POSITION AS LEFT SIDEBAR ==========
         var menuRect = characterSelectMenu.GetComponent<RectTransform>();
         if (menuRect)
         {
-            // Position the Character Select menu to the LEFT of its parent (Loadout Menu)
-            // Using anchors to the left edge for resolution independence
+            menuRect.anchorMin = new Vector2(0, 0.5f);
+            menuRect.anchorMax = new Vector2(0, 0.5f);
+            menuRect.pivot = new Vector2(1, 0.5f);
+            menuRect.anchoredPosition = new Vector2(-10, 0);
 
-            menuRect.anchorMin = new Vector2(0, 0.5f);     // Left edge, vertically centered
-            menuRect.anchorMax = new Vector2(0, 0.5f);     // Same point (not stretched)
-            menuRect.pivot = new Vector2(1, 0.5f);         // Pivot at RIGHT edge (so it grows leftward)
-
-            // Position it to the left of the parent
-            // X: 0 means touching the left edge of parent (but pivot is on right, so menu extends left)
-            // You can add negative offset to add gap: e.g., -10 for 10px gap
-            menuRect.anchoredPosition = new Vector2(-10, 0); // 10px gap to the left
-
-            // Match height to parent (or set specific height)
-            // Get parent's height to match
             var parentRect = characterSelectMenu.transform.parent.GetComponent<RectTransform>();
             if (parentRect)
             {
                 var parentHeight = parentRect.rect.height;
-                menuRect.sizeDelta = new Vector2(650, parentHeight); // 400px wide, same height as parent
+                menuRect.sizeDelta = new Vector2(650, parentHeight); 
                 Main.Logger.LogDebug($"CharacterSelect: Positioned to left - Width: 400px, Height: {parentHeight}px");
             }
             else
             {
-                // Fallback to fixed size
                 menuRect.sizeDelta = new Vector2(650, 800);
                 Main.Logger.LogDebug("CharacterSelect: Positioned to left - Width: 400px, Height: 600px (fixed)");
             }

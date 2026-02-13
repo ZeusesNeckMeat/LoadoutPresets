@@ -35,7 +35,6 @@ public class LoadoutPresets : BasePlugin
     {
         _logger.LogInfo($"Loading {Constants.MODNAME} v{Constants.VERSION} by {Constants.AUTHOR}");
 
-        // Set up the LoadoutPresets folder
         _loadoutPresetsFolder = Path.Combine(Paths.ConfigPath, "LoadoutPresets");
         if (!Directory.Exists(_loadoutPresetsFolder))
         {
@@ -68,7 +67,6 @@ public class LoadoutPresets : BasePlugin
     {
         var loadoutName = inputField.text.Trim();
 
-        // Validate that user provided a name
         if (string.IsNullOrEmpty(loadoutName))
         {
             _logger.LogWarning("Cannot save loadout: No name provided.");
@@ -88,13 +86,11 @@ public class LoadoutPresets : BasePlugin
             }
         }
 
-        // Sanitize filename
         var invalidChars = Path.GetInvalidFileNameChars();
         loadoutName = invalidChars.Aggregate(loadoutName, (current, c) => current.Replace(c, '_'));
 
         SaveCurrentLoadout(loadoutName);
 
-        // Clear the input field after successful save
         inputField.text = "";
 
         _logger.LogInfo($"Loadout '{loadoutName}' saved successfully.");
@@ -158,18 +154,15 @@ public class LoadoutPresets : BasePlugin
             return;
         }
 
-        // Update the linked character
         var characterDisplayName =  DataManager.Instance.characterData[character].GetName();
         loadoutData.LinkedCharacter = characterDisplayName;
 
-        // Save back to file
         var filePath = Path.Combine(_loadoutPresetsFolder, $"{loadoutName}.json");
         var json = JsonSerializer.Serialize(loadoutData, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(filePath, json);
 
         _logger.LogInfo($"Updated loadout '{loadoutName}' - linked character: {characterDisplayName ?? "None"}");
 
-        // Refresh the UI to show the updated character
         LoadoutsMenu.UpdateLoadoutListItemCharacter(loadoutName, character);
 
         if (_loadoutCacheByLoadoutName.ContainsKey(loadoutName))
@@ -207,20 +200,16 @@ public class LoadoutPresets : BasePlugin
             return;
         }
 
-        // Remove the linked character
         loadoutData.LinkedCharacter = null;
 
-        // Save back to file
         var filePath = Path.Combine(_loadoutPresetsFolder, $"{loadoutName}.json");
         var json = JsonSerializer.Serialize(loadoutData, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(filePath, json);
 
         _logger.LogInfo($"Removed linked character from loadout '{loadoutName}'");
 
-        // Update the UI to show no character
         LoadoutsMenu.UpdateLoadoutListItemCharacter(loadoutName, null);
 
-        // Update cache
         if (_loadoutCacheByLoadoutName.ContainsKey(loadoutName))
         {
             _loadoutCacheByLoadoutName[loadoutName].LinkedCharacter = null;
@@ -267,10 +256,7 @@ public class LoadoutPresets : BasePlugin
             return;
         }
 
-        // Clear current inactivated list
         SaveManager.Instance.progression.inactivated.Clear();
-
-        // Restore inactivated unlockables from the loadout
         foreach (var inactivatedItem in loadoutData.InactivatedUnlockables)
         {
             SaveManager.Instance.progression.inactivated.Add(inactivatedItem);
@@ -278,7 +264,6 @@ public class LoadoutPresets : BasePlugin
 
         _logger.LogInfo($"Loadout '{loadoutName}' loaded successfully. Restored {loadoutData.InactivatedUnlockables.Count} inactivated items.");
 
-        // Optional: Save the game state so changes persist
         SaveManager.Instance.SaveProgression();
     }
 

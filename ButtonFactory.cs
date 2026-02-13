@@ -51,7 +51,6 @@ internal static class ButtonFactory
         var targetParent = customParent ?? templateButton.transform.parent;
         clonedButton.transform.SetParent(targetParent, false);
 
-        // Set sibling index (only if using template's parent for consistency)
         if (customParent == null)
         {
             clonedButton.transform.SetSiblingIndex(templateButton.transform.GetSiblingIndex());
@@ -141,7 +140,6 @@ internal static class ButtonFactory
         var templateButtonComponent = templateSourceGameObject.GetComponent<MyButtonNormal>();
         var buttonImageComponent = targetButtonComponent.GetComponent<Image>();
 
-        // Ensure the Image has a sprite to prevent NullReferenceException during layout calculations
         if (buttonImageComponent && buttonImageComponent.sprite == null)
         {
             var templateImage = templateSourceGameObject.GetComponent<Image>();

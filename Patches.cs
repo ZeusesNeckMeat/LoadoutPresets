@@ -1,5 +1,4 @@
-﻿using Assets.Scripts.Actors.Player;
-using Assets.Scripts.Inventory__Items__Pickups;
+﻿using Assets.Scripts.Inventory__Items__Pickups;
 using Assets.Scripts.Managers;
 
 using HarmonyLib;
@@ -46,15 +45,14 @@ internal static class GameManager_OnPlayerInit_Patch
 [HarmonyPatch(typeof(MyButtonCharacter), nameof(MyButtonCharacter.SetCharacter))]
 internal static class MyButtonCharacter_SetCharacter_Patch
 {
-    private static readonly HashSet<IntPtr> _hookedButtons = new();
-    public static readonly Dictionary<IntPtr, ECharacter> CharacterCache = new();
+    private static readonly HashSet<IntPtr> _hookedButtons = [];
+    public static readonly Dictionary<IntPtr, ECharacter> CharacterCache = [];
 
     [HarmonyPostfix]
     private static void Postfix(MyButtonCharacter __instance, CharacterData data)
     {
         try
         {
-            // Null check the instance first
             if (__instance == null)
             {
                 Main.Logger.LogWarning("MyButtonCharacter.SetCharacter: __instance is null");
@@ -69,35 +67,31 @@ internal static class MyButtonCharacter_SetCharacter_Patch
                 return;
             }
 
-            // Only hook each button once
             if (_hookedButtons.Contains(instancePtr))
                 return;
 
-            // Check if transform is valid before traversing hierarchy
             if (__instance.transform == null)
             {
                 Main.Logger.LogWarning($"MyButtonCharacter.SetCharacter: transform is null for {data?.icon?.name}");
                 return;
             }
 
-            // CHECK: Is this button inside OUR cloned character select menu?
             Transform current = __instance.transform;
-            bool isOurButton = false;
+            bool isLoadoutPresetsCharacterSelectButton = false;
 
             while (current != null)
             {
                 if (current.name == "W_LoadoutCharacterSelector")
                 {
-                    isOurButton = true;
+                    isLoadoutPresetsCharacterSelectButton = true;
                     break;
                 }
                 current = current.parent;
             }
 
-            // If this button is NOT in our menu, skip it
-            if (!isOurButton)
+            if (!isLoadoutPresetsCharacterSelectButton)
             {
-                Main.Logger.LogDebug($"MyButtonCharacter.SetCharacter: Skipping button (not in our menu) - {data?.icon?.name}");
+                Main.Logger.LogDebug($"MyButtonCharacter.SetCharacter: Skipping button (not in LoadoutPresets menu) - {data?.icon?.name}");
                 return;
             }
 
@@ -105,22 +99,18 @@ internal static class MyButtonCharacter_SetCharacter_Patch
 
             Main.Logger.LogDebug($"MyButtonCharacter.SetCharacter: Hooking LoadoutPresets button for {data?.icon?.name}");
 
-            // Store the character enum in cache
             var eCharacter = data?.eCharacter ?? ECharacter.SirOofie;
             CharacterCache[instancePtr] = eCharacter;
 
-            // Add a Unity event listener to intercept clicks
             var eventTrigger = __instance.gameObject.GetOrAddComponent<EventTrigger>();
             Main.Logger.LogDebug($"MyButtonCharacter.SetCharacter: Adding EventTrigger listener for {data?.icon?.name} - EventTrigger component: {eventTrigger?.name ?? "null"}");
             if (eventTrigger != null)
             {
-                // Create a new PointerClick entry
                 var entry = new EventTrigger.Entry
                 {
                     eventID = EventTriggerType.PointerClick
                 };
 
-                // Inject callback
                 entry.callback.AddListener(new Action<BaseEventData>((eventData) =>
                 {
                     try
@@ -138,11 +128,9 @@ internal static class MyButtonCharacter_SetCharacter_Patch
                     }
                 }));
 
-                // Add the entry at the BEGINNING so it runs first
                 eventTrigger.triggers.Insert(0, entry);
                 Main.Logger.LogDebug($"Added EventTrigger listener for character: {eCharacter}");
 
-                // Deactivate unneeded components
                 var instanceTransform = __instance.transform;
                 Main.Logger.LogDebug($"Cleaning up button components for {eCharacter} - Parent: {instanceTransform?.name}");
                 var characterSelectedOverlayTransform = instanceTransform.Find("CharacterSelectedOverlay");
